@@ -1,0 +1,131 @@
+{
+  "name": "log-merger-viewer",
+  "displayName": "Log Merger Viewer",
+  "description": "複数のログファイルを時間順に結合して表示するVSCode拡張機能",
+  "version": "0.0.1",
+  "icon": "images/icon.png",
+  "publisher": "one-case",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "log-merger-viewer.mergeAndView",
+        "title": "ログファイルを時間順に結合して表示"
+      }
+    ],
+    "menus": {},
+    "configuration": {
+      "title": "Log Merger Viewer",
+      "properties": {
+        "logMergerViewer.timeFormat": {
+          "type": "string",
+          "default": "YYYY-MM-DD HH:mm:ss,SSS",
+          "description": "ログの時刻フォーマット（momentフォーマット）"
+        },
+        "logMergerViewer.timeRegex": {
+          "type": "string",
+          "default": "(\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}(?:,\\d{3})?)",
+          "description": "ログから時刻を抽出する正規表現"
+        },
+        "logMergerViewer.colorPalette": {
+          "type": "array",
+          "default": [
+            "#c8e6c980",
+            "#bbdefb80",
+            "#d1c4e980",
+            "#ffcdd280",
+            "#ffe0b280",
+            "#b3e5fc80",
+            "#c5cae980",
+            "#f8bbd080",
+            "#dcedc880",
+            "#fff9c480"
+          ],
+          "description": "ファイル背景色パレット（HEX形式、最後の2桁は透明度）"
+        },
+        "logMergerViewer.darkThemeColorPalette": {
+          "type": "array",
+          "default": [
+            "#1B5E2040",
+            "#0D47A140",
+            "#4A148C40",
+            "#B7131340",
+            "#E6500040",
+            "#00626640",
+            "#1A237E40",
+            "#88018740",
+            "#33691E40",
+            "#FF640040"
+          ],
+          "description": "ダークテーマ用の背景色パレット"
+        },
+        "logMergerViewer.timeGapThreshold": {
+          "type": "number",
+          "default": 60,
+          "description": "イベント間の空白を表示する閾値（秒）"
+        },
+        "logMergerViewer.showTimeGaps": {
+          "type": "boolean",
+          "default": true,
+          "description": "イベント間の時間ギャップを表示するかどうか"
+        },
+        "logMergerViewer.deleteTempFilesOnClose": {
+          "type": "boolean",
+          "default": true,
+          "description": "エディタを閉じる際に一時ファイルを削除するかどうか"
+        },
+        "logMergerViewer.showFilePrefix": {
+          "type": "boolean",
+          "default": true,
+          "description": "ログの各行の先頭にファイル名を表示するかどうか"
+        },
+        "logMergerViewer.filePrefixType": {
+          "type": "string",
+          "enum": [
+            "full",
+            "short",
+            "initial"
+          ],
+          "default": "short",
+          "description": "ファイル名の表示形式 (full: 完全なファイル名, short: 拡張子なし, initial: 頭文字のみ)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.17.32",
+    "@types/vscode": "^1.99.1",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.25.1",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "moment": "^2.30.1"
+  }
+}
