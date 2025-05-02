@@ -1,0 +1,12 @@
+{
+	"logMergerViewer.mergeAndView": "ログファイルを時間順に結合して表示",
+	"logMergerViewer.timeFormat.description": "ログの時刻フォーマット（momentフォーマット）",
+	"logMergerViewer.timeRegex.description": "ログから時刻を抽出する正規表現",
+	"logMergerViewer.colorPalette.description": "ファイル背景色パレット（HEX形式、最後の2桁は透明度）",
+	"logMergerViewer.darkThemeColorPalette.description": "ダークテーマ用の背景色パレット",
+	"logMergerViewer.timeGapThreshold.description": "イベント間の空白を表示する閾値（秒）",
+	"logMergerViewer.showTimeGaps.description": "イベント間の時間ギャップを表示するかどうか",
+	"logMergerViewer.deleteTempFilesOnClose.description": "エディタを閉じる際に一時ファイルを削除するかどうか",
+	"logMergerViewer.showFilePrefix.description": "ログの各行の先頭にファイル名を表示するかどうか",
+	"logMergerViewer.filePrefixType.description": "ファイル名の表示形式 (full: 完全なファイル名, short: 拡張子なし, initial: 頭文字のみ)"
+}

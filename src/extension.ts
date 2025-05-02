@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import moment from 'moment'; // デフォルトインポート
+import { Messages } from './nls/messages';
 
 // ログエントリの型定義
 interface LogEntry {
@@ -28,7 +29,7 @@ const fileLineMapCache = new Map<string, Map<number, { file: string, color: stri
 
 // 拡張機能のアクティベート時に呼ばれる関数
 export function activate(context: vscode.ExtensionContext): void {
-	console.log('Log Merger Viewer アクティベート');
+	console.log(Messages.mergeLogs);
 
 	// ステータスバー項目を作成
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -43,7 +44,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				filters: {
 					'ログファイル': ['log', 'txt']
 				},
-				title: '表示するログファイルを選択'
+				title: Messages.selectLogFiles
 			});
 
 			if (!result || result.length === 0) {
@@ -83,9 +84,9 @@ export function activate(context: vscode.ExtensionContext): void {
 					});
 				} catch (error) {
 					if (error instanceof Error) {
-						vscode.window.showErrorMessage(`ファイル ${filename} の解析中にエラーが発生しました: ${error.message}`);
+						vscode.window.showErrorMessage(Messages.parseError.replace('{0}', filename).replace('{1}', error.message));
 					} else {
-						vscode.window.showErrorMessage(`ファイル ${filename} の解析中に不明なエラーが発生しました。`);
+						vscode.window.showErrorMessage(Messages.parseUnknownError.replace('{0}', filename));
 					}
 				}
 			}
@@ -154,9 +155,9 @@ export function activate(context: vscode.ExtensionContext): void {
 						if (deleteTempFilesOnClose) {
 							try {
 								fs.unlinkSync(docPath);
-								console.log(`一時ファイルを削除しました: ${docPath}`);
+								console.log(Messages.tempFileDeleted.replace('{0}', docPath));
 							} catch (error) {
-								console.error('一時ファイルの削除に失敗しました:', error);
+								console.error(`${Messages.tempFileDeleteFailed} `, error);
 							}
 						}
 
@@ -170,7 +171,7 @@ export function activate(context: vscode.ExtensionContext): void {
 						);
 
 						if (foundKey) {
-							console.log(`キャッシュから削除: ${foundKey}`);
+							console.log(Messages.cacheRemoved.replace('{0}', foundKey));
 							fileLineMapCache.delete(foundKey);
 						}
 
@@ -198,7 +199,7 @@ export function activate(context: vscode.ExtensionContext): void {
 					if (fileInfo) {
 						// ファイル名をステータスバーに表示
 						statusBarItem.text = `$(file) ${fileInfo.file}`;
-						statusBarItem.tooltip = `現在の行のファイル: ${fileInfo.file}`;
+						statusBarItem.tooltip = Messages.currentFileLine.replace('{0}', fileInfo.file);
 						statusBarItem.show();
 					} else {
 						statusBarItem.hide();
@@ -217,9 +218,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
 		} catch (error) {
 			if (error instanceof Error) {
-				vscode.window.showErrorMessage(`エラーが発生しました: ${error.message}`);
+				vscode.window.showErrorMessage(Messages.errorOccurred.replace('{0}', error.message));
 			} else {
-				vscode.window.showErrorMessage('不明なエラーが発生しました。');
+				vscode.window.showErrorMessage(Messages.unknownError);
 			}
 		}
 	});
@@ -277,15 +278,15 @@ function setupHoverProvider(editor: vscode.TextEditor, fileLineMap: Map<number, 
 
 					// ファイル情報のMarkdownを作成
 					const markdownContent = new vscode.MarkdownString();
-					markdownContent.appendMarkdown(`**ファイル情報**\n\n`);
-					markdownContent.appendMarkdown(`- **ファイル名**: ${fileInfo.file}\n`);
-					markdownContent.appendMarkdown(`- **色**: ${colorBlock} ${fileInfo.color}\n`);
+					markdownContent.appendMarkdown(`**${Messages.fileInfoTitle}**\n\n`);
+					markdownContent.appendMarkdown(`- **${Messages.fileName}**: ${fileInfo.file}\n`);
+					markdownContent.appendMarkdown(`- **${Messages.color}**: ${colorBlock} ${fileInfo.color}\n`);
 
 					// 原ファイルのパスを取得して表示（可能であれば）
 					const originalFile = fileInfos.find(f => f.filename === fileInfo.file);
 					if (originalFile) {
 						const entriesCount = originalFile.entries.length;
-						markdownContent.appendMarkdown(`- **エントリ数**: ${entriesCount} 行\n`);
+						markdownContent.appendMarkdown(`- **${Messages.entryCount}**: ${entriesCount} ${Messages.entryUnit}\n`);
 					}
 
 					return new vscode.Hover(markdownContent);
@@ -351,12 +352,12 @@ function generateMergedContent(
 	const fileLineMap = new Map<number, { file: string, color: string }>();
 
 	// ファイル情報ヘッダーを追加
-	mergedContent += '# Log Merger Viewer - 結合ログファイル\n';
-	mergedContent += `# 生成日時: ${moment().format('YYYY-MM-DD HH:mm:ss')}\n`;
-	mergedContent += '# 元ファイル:\n';
+	mergedContent += `# ${Messages.headerTitle}\n`;
+	mergedContent += `# ${Messages.generatedAt.replace('{0}', moment().format('YYYY-MM-DD HH:mm:ss'))}\n`;
+	mergedContent += `# ${Messages.sourceFiles}\n`;
 
 	// 色の凡例を追加
-	mergedContent += '#\n# ファイルの色対応:\n';
+	mergedContent += `#\n# ${Messages.colorLegend}\n`;
 	// ヘッダー行の基準行数
 	const headerBaseLineCount = 5;
 
@@ -365,7 +366,7 @@ function generateMergedContent(
 		const prefix = filePrefixMap.get(filename) || '';
 
 		// 色のブロックと、使用されるプレフィックスを表示
-		mergedContent += `# ■ ${filename} (${fileInfo.color}) ${showFilePrefix ? '- プレフィックス: ' + prefix : ''}\n`;
+		mergedContent += `# ■ ${filename} (${fileInfo.color}) ${showFilePrefix ? Messages.prefixLabel.replace('{0}', prefix) : ''}\n`;
 
 		// ヘッダー行のカラーマッピングを追加（ファイルカラーと同じ色）
 		fileLineMap.set(headerBaseLineCount + index, {
@@ -382,7 +383,7 @@ function generateMergedContent(
 	for (const entry of entriesWithGaps) {
 		if ('isGap' in entry && entry.isGap) {
 			// ギャップ行を追加
-			mergedContent += `\n--- ${entry.formattedGap}の間隔 ---\n\n`;
+			mergedContent += `\n--- ${Messages.timeGapLabel.replace('{0}', entry.formattedGap)} ---\n\n`;
 			lineNumber += 3; // ギャップ前後の空行を含む
 		} else if ('content' in entry) {
 			// ファイルプレフィックスを追加（設定されている場合）
@@ -424,7 +425,7 @@ function applyDecorations(editor: vscode.TextEditor, fileLineMap: Map<number, { 
 
 		// カラーパレットが空の場合にフォールバック
 		if (!colorPalette || colorPalette.length === 0) {
-			console.warn('カラーパレットが空です。デフォルトの色を使用します。');
+			console.warn(Messages.emptyPaletteWarning);
 		}
 
 		// 既存の装飾をクリーンアップ
@@ -516,7 +517,7 @@ function applyFileDecorations(
 
 	// 大量の装飾がある場合は警告（パフォーマンスへの影響を考慮）
 	if (totalRanges > 10000) {
-		console.warn(`警告: ${totalRanges} 行の装飾が適用されています。パフォーマンスに影響がある可能性があります。`);
+		console.warn(Messages.largeDecorationWarning.replace('{0}', String(totalRanges)));
 	}
 }
 
@@ -578,13 +579,23 @@ function formatDuration(milliseconds: number): string {
 	const days = Math.floor(hours / 24);
 
 	if (days > 0) {
-		return `${days}日${hours % 24}時間${minutes % 60}分${seconds % 60}秒`;
+		return Messages.dayFormat
+			.replace('{0}', String(days))
+			.replace('{1}', String(hours % 24))
+			.replace('{2}', String(minutes % 60))
+			.replace('{3}', String(seconds % 60));
 	} else if (hours > 0) {
-		return `${hours}時間${minutes % 60}分${seconds % 60}秒`;
+		return Messages.hourFormat
+			.replace('{0}', String(hours))
+			.replace('{1}', String(minutes % 60))
+			.replace('{2}', String(seconds % 60));
 	} else if (minutes > 0) {
-		return `${minutes}分${seconds % 60}秒`;
+		return Messages.minuteFormat
+			.replace('{0}', String(minutes))
+			.replace('{1}', String(seconds % 60));
 	} else {
-		return `${seconds}秒`;
+		return Messages.secondFormat
+			.replace('{0}', String(seconds));
 	}
 }
 

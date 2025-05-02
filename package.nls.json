@@ -1,0 +1,12 @@
+{
+	"logMergerViewer.mergeAndView": "Merge and view log files chronologically",
+	"logMergerViewer.timeFormat.description": "Time format in log files (moment format)",
+	"logMergerViewer.timeRegex.description": "Regular expression to extract time from logs",
+	"logMergerViewer.colorPalette.description": "File background color palette (HEX format, last 2 digits for transparency)",
+	"logMergerViewer.darkThemeColorPalette.description": "Background color palette for dark themes",
+	"logMergerViewer.timeGapThreshold.description": "Threshold to display time gap between events (seconds)",
+	"logMergerViewer.showTimeGaps.description": "Whether to show time gaps between events",
+	"logMergerViewer.deleteTempFilesOnClose.description": "Delete temporary files when editor is closed",
+	"logMergerViewer.showFilePrefix.description": "Show file name prefix at the beginning of log lines",
+	"logMergerViewer.filePrefixType.description": "File name prefix format (full: complete file name, short: without extension, initial: initials only)"
+}
