@@ -2,7 +2,7 @@
   "name": "log-merger-viewer",
   "displayName": "Log Merger Viewer",
   "description": "複数のログファイルを時間順に結合して表示するVSCode拡張機能",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "icon": "images/icon.png",
   "publisher": "one-case",
   "engines": {
@@ -127,6 +127,8 @@
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
     "vscode-nls-dev": "^4.0.4",
+    "chai": "^4.3.7",
+    "sinon": "^15.0.1",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   },
