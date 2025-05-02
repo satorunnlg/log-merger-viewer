@@ -6,7 +6,8 @@ VSCode用ログマージャービューア拡張機能 - 複数のログファ�
 
 「Log Merger Viewer」は、複数のログファイルを時間順に結合して1つのビューで表示できるVSCode拡張機能です。異なるシステムやアプリケーションから出力されたログを時系列で確認することで、問題の原因究明や開発・デバッグ作業を効率化します。
 
-!スクリーンショット
+![Log Merger Viewerのスクリーンショット](images/sammary-shot.png)
+*複数のログファイルを時間順に結合し、ファイルごとに色分け表示した例*
 
 ## 主な機能
 
@@ -28,7 +29,7 @@ VSCode用ログマージャービューア拡張機能 - 複数のログファ�
 
 ### VSIX手動インストール
 
-1. [リリースページ](https://github.com/your-username/log-merger-viewer/releases)からVSIXファイルをダウンロード
+1. [リリースページ](https://github.com/satorunnlg/log-merger-viewer/releases)からVSIXファイルをダウンロード
 2. VSCodeを起動
 3. 拡張機能ビュー（Ctrl+Shift+X）を開く
 4. 右上の「...」メニューから「VSIXからのインストール」を選択
