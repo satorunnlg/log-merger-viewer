@@ -145,15 +145,19 @@ export function activate(context: vscode.ExtensionContext): void {
 			// ファイルがクローズされたときに一時ファイルを削除するイベントリスナーを設定
 			const deleteTempFilesOnClose = config.get<boolean>('deleteTempFilesOnClose', true);
 
-			if (deleteTempFilesOnClose) {
-				const disposable = vscode.workspace.onDidCloseTextDocument((doc) => {
-					if (doc.uri.fsPath === tempFilePath) {
-						// ファイルが閉じられたら一時ファイルを削除
-						try {
-							fs.unlinkSync(tempFilePath);
-							console.log(`一時ファイルを削除しました: ${tempFilePath}`);
-						} catch (error) {
-							console.error('一時ファイルの削除に失敗しました:', error);
+			const disposable = vscode.workspace.onDidCloseTextDocument((doc) => {
+				try {
+					const docPath = doc.uri.fsPath.toLowerCase();
+
+					if (docPath.includes('logmerger_')) {
+						// 一時ファイルを削除
+						if (deleteTempFilesOnClose) {
+							try {
+								fs.unlinkSync(docPath);
+								console.log(`一時ファイルを削除しました: ${docPath}`);
+							} catch (error) {
+								console.error('一時ファイルの削除に失敗しました:', error);
+							}
 						}
 
 						// ステータスバー項目を非表示にする
@@ -161,14 +165,27 @@ export function activate(context: vscode.ExtensionContext): void {
 						disposable.dispose();
 
 						// キャッシュから行マッピング情報を削除
-						fileLineMapCache.delete(tempFilePath);
-					}
-				});
+						const foundKey = Array.from(fileLineMapCache.keys()).find(
+							key => key.toLowerCase() === docPath
+						);
 
-				context.subscriptions.push(disposable);
-			} else {
-				console.log(`一時ファイルは保持されます: ${tempFilePath}`);
-			}
+						if (foundKey) {
+							console.log(`キャッシュから削除: ${foundKey}`);
+							fileLineMapCache.delete(foundKey);
+						}
+
+						// 装飾タイプを解放
+						fileDecorationTypes.forEach(decorationType => {
+							decorationType.dispose();
+						});
+						fileDecorationTypes.clear();
+					}
+				} catch (error) {
+					console.error('ドキュメント終了処理中にエラーが発生しました:', error);
+				}
+			});
+
+			context.subscriptions.push(disposable);
 
 			// 選択行変更イベントリスナーの設定（カーソル位置の行のファイルを表示）
 			const selectionChangeDisposable = vscode.window.onDidChangeTextEditorSelection(e => {
@@ -394,36 +411,65 @@ function generateMergedContent(
 
 // 装飾を適用する関数
 function applyDecorations(editor: vscode.TextEditor, fileLineMap: Map<number, { file: string, color: string }>): void {
-	// テーマの種類を検出
-	const isDarkTheme = vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark
-		|| vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
+	try {
+		// テーマの種類を検出
+		const isDarkTheme = vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark
+			|| vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
 
-	// 設定から適切なカラーパレットを取得
-	const config = vscode.workspace.getConfiguration('logMergerViewer');
-	const colorPalette = isDarkTheme
-		? config.get<string[]>('darkThemeColorPalette')
-		: config.get<string[]>('colorPalette');
+		// 設定から適切なカラーパレットを取得
+		const config = vscode.workspace.getConfiguration('logMergerViewer');
+		const colorPalette = isDarkTheme
+			? config.get<string[]>('darkThemeColorPalette', [])
+			: config.get<string[]>('colorPalette', []);
 
-	// ファイルごとの装飾タイプをクリア
+		// カラーパレットが空の場合にフォールバック
+		if (!colorPalette || colorPalette.length === 0) {
+			console.warn('カラーパレットが空です。デフォルトの色を使用します。');
+		}
+
+		// 既存の装飾をクリーンアップ
+		clearDecorations();
+
+		// ファイルごとに行をグループ化する効率的な方法
+		const fileRanges = groupRangesByFile(fileLineMap, colorPalette);
+
+		// 装飾を適用
+		applyFileDecorations(editor, fileRanges);
+	} catch (error) {
+		console.error('装飾適用中にエラーが発生しました:', error);
+		vscode.window.showErrorMessage('ハイライト表示中にエラーが発生しました。');
+	}
+}
+
+// 既存の装飾をクリア
+function clearDecorations(): void {
 	fileDecorationTypes.forEach(decorationType => {
 		decorationType.dispose();
 	});
 	fileDecorationTypes.clear();
+}
 
-	// ファイルごとに行をグループ化
+// ファイルごとに行をグループ化
+function groupRangesByFile(
+	fileLineMap: Map<number, { file: string, color: string }>,
+	colorPalette: string[]
+): Map<string, { color: string, ranges: vscode.Range[] }> {
 	const fileRanges = new Map<string, { color: string, ranges: vscode.Range[] }>();
 
 	// 各行をファイルごとに分類
 	fileLineMap.forEach((fileInfo, lineNum) => {
 		const { file } = fileInfo;
 
+		// ファイルのエントリがなければ初期化
 		if (!fileRanges.has(file)) {
 			fileRanges.set(file, { color: '', ranges: [] });
 		}
 
 		// テーマに基づいた色を選択
 		const fileIndex = Array.from(fileRanges.keys()).indexOf(file);
-		const color = colorPalette ? colorPalette[fileIndex % colorPalette.length] : fileInfo.color;
+		const color = colorPalette && colorPalette.length > 0
+			? colorPalette[fileIndex % colorPalette.length]
+			: fileInfo.color;
 
 		// 行範囲を追加
 		const range = new vscode.Range(
@@ -437,6 +483,17 @@ function applyDecorations(editor: vscode.TextEditor, fileLineMap: Map<number, { 
 			fileRange.ranges.push(range);
 		}
 	});
+
+	return fileRanges;
+}
+
+// ファイル装飾を適用
+function applyFileDecorations(
+	editor: vscode.TextEditor,
+	fileRanges: Map<string, { color: string, ranges: vscode.Range[] }>
+): void {
+	// メモリ使用量を監視するためのカウント
+	let totalRanges = 0;
 
 	// 各ファイルの装飾を適用
 	fileRanges.forEach((fileRange, file) => {
@@ -454,7 +511,13 @@ function applyDecorations(editor: vscode.TextEditor, fileLineMap: Map<number, { 
 
 		// デバッグ用にログ出力
 		console.log(`ファイル ${file} に ${fileRange.ranges.length} 行の装飾を適用しました (色: ${fileRange.color})`);
+		totalRanges += fileRange.ranges.length;
 	});
+
+	// 大量の装飾がある場合は警告（パフォーマンスへの影響を考慮）
+	if (totalRanges > 10000) {
+		console.warn(`警告: ${totalRanges} 行の装飾が適用されています。パフォーマンスに影響がある可能性があります。`);
+	}
 }
 
 // ログファイルからエントリを解析する関数
