@@ -1,71 +1,125 @@
-# log-merger-viewer README
+# Log Merger Viewer
 
-This is the README for your extension "log-merger-viewer". After writing up a brief description, we recommend including the following sections.
+VSCode用ログマージャービューア拡張機能 - 複数のログファイルを時間順に統合して表示
 
-## Features
+## 概要
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+「Log Merger Viewer」は、複数のログファイルを時間順に結合して1つのビューで表示できるVSCode拡張機能です。異なるシステムやアプリケーションから出力されたログを時系列で確認することで、問題の原因究明や開発・デバッグ作業を効率化します。
 
-For example if there is an image subfolder under your extension project workspace:
+!スクリーンショット
 
-\!\[feature X\]\(images/feature-x.png\)
+## 主な機能
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- 複数のログファイルを時間順に結合して表示
+- ファイル別の色分け表示でソースの識別が容易
+- 一定時間以上のイベントがない場合、区切り線と時間間隔を表示
+- 大きなログファイルにも対応する最適化された表示
+- ファイルツリーの右クリックメニューからの複数ファイル選択
+- 一時ファイル名にタイムスタンプを含む
 
-## Requirements
+## インストール方法
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### VSCodeマーケットプレイスから
 
-## Extension Settings
+1. VSCodeを起動
+2. 拡張機能ビュー（Ctrl+Shift+X）を開く
+3. 「Log Merger Viewer」を検索
+4. 「インストール」ボタンをクリック
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### VSIX手動インストール
 
-For example:
+1. [リリースページ](https://github.com/your-username/log-merger-viewer/releases)からVSIXファイルをダウンロード
+2. VSCodeを起動
+3. 拡張機能ビュー（Ctrl+Shift+X）を開く
+4. 右上の「...」メニューから「VSIXからのインストール」を選択
+5. ダウンロードしたVSIXファイルを選択
 
-This extension contributes the following settings:
+## 使用方法
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### ログファイルの表示
 
-## Known Issues
+1. エクスプローラーからログファイルを選択（複数選択可）
+2. 右クリックして「ログファイルを時間順に結合して表示」を選択
+   - または、フォルダを右クリックしてフォルダ内のログファイルから選択
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### コマンドパレットからの起動
 
-## Release Notes
+1. `Ctrl+Shift+P`でコマンドパレットを開く
+2. 「ログファイルを時間順に結合して表示」を選択
+3. ファイル選択ダイアログからログファイルを選択（複数選択可）
 
-Users appreciate release notes as you update your extension.
+### 結合ファイルの操作
 
-### 1.0.0
+- カーソルを動かすと、同じファイルからのログエントリが強調表示されます
+- ステータスバーに現在行のファイル名が表示されます
+- 標準のVSCode検索機能（Ctrl+F）を使用できます
+- 標準のVSCodeエディタ機能が使用可能（折りたたみ、行番号表示など）
 
-Initial release of ...
+## 設定項目
 
-### 1.0.1
+拡張機能の設定は以下の方法で変更できます：
+1. `Ctrl+,`を押して設定を開く
+2. 「拡張機能」タブを選択
+3. 「Log Merger Viewer」を選択
 
-Fixed issue #.
+### 主な設定項目
 
-### 1.1.0
+- `logMergerViewer.timeFormat`: ログの時刻フォーマット（momentフォーマット）
+- `logMergerViewer.timeRegex`: ログから時刻を抽出する正規表現
+- `logMergerViewer.colorPalette`: ファイル背景色パレット（通常テーマ用）
+- `logMergerViewer.darkThemeColorPalette`: ファイル背景色パレット（ダークテーマ用）
+- `logMergerViewer.showTimeGaps`: 時間間隔の表示（true/false）
+- `logMergerViewer.timeGapThreshold`: 時間間隔を表示する閾値（秒）
+- `logMergerViewer.showFilePrefix`: ファイルプレフィックスを表示（true/false）
+- `logMergerViewer.filePrefixType`: プレフィックス形式（full/short/initial）
+- `logMergerViewer.deleteTempFilesOnClose`: エディタ終了時に一時ファイル削除（true/false）
 
-Added features X, Y, and Z.
+### カスタムログフォーマット対応
 
----
+独自のログフォーマットに対応するには、以下の設定を変更します：
 
-## Following extension guidelines
+1. タイムスタンプ形式: `logMergerViewer.timeFormat` 
+   例: `YYYY/MM/DD HH:mm:ss.SSS`
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+2. タイムスタンプ抽出用正規表現: `logMergerViewer.timeRegex`
+   例: `(\\d{4}/\\d{2}/\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d{3})`
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+## トラブルシューティング
 
-## Working with Markdown
+### よくある問題
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+1. **時刻が正しく認識されない**
+   - `timeFormat`と`timeRegex`の設定がログファイルのフォーマットと一致しているか確認してください
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+2. **結合表示が表示されない**
+   - ログファイルが正しく選択されていることを確認
+   - ログファイル内に有効なタイムスタンプが含まれていることを確認
 
-## For more information
+3. **エディタタブを切り替えるとハイライトが消える**
+   - 拡張機能の更新を確認してください（v1.2.0以降で修正済み）
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### 一時ファイルについて
 
-**Enjoy!**
+デフォルトでは、エディタを閉じると一時ファイルは自動的に削除されます。一時ファイルを保持したい場合は、設定の`logMergerViewer.deleteTempFilesOnClose`を`false`に設定してください。
+
+## 開発者情報
+
+### ビルド手順
+
+```bash
+git clone https://github.com/satorunnlg/log-merger-viewer.git
+cd log-merger-viewer
+npm install
+npm run compile
+```
+
+### パッケージング
+
+```bash
+npm install -g @vscode/vsce
+vsce package
+```
+
+## ライセンス
+
+MIT License - 詳細はLICENSEファイルを参照してください。
