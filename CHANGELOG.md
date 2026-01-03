@@ -2,6 +2,22 @@
 
 このファイルでは「Log Merger Viewer」拡張機能のすべての重要な変更を記録しています。
 
+## [0.1.1] - 2026年1月3日
+
+### セキュリティ
+- npm audit により3件の低重要度脆弱性を修正
+  - @eslint/plugin-kit: 正規表現DoS (ReDoS) 脆弱性修正 (< 0.3.4)
+  - brace-expansion: 正規表現DoS (ReDoS) 脆弱性修正 (1.0.0-1.1.11, 2.0.0-2.0.1)
+
+### 改善
+- 依存関係の整理
+  - sinon と chai をproduction依存から開発依存へ正しく移動
+  - package.json の依存関係構成を最適化
+
+### 開発環境
+- .gitignore に CLAUDE.md と DESIGN.md を追加
+  - AI開発支援用ドキュメントをGit管理対象外に設定
+
 ## [0.1.0] - 2025年5月3日
 
 ### 機能追加
