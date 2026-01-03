@@ -4,3 +4,7 @@ node_modules
 .vscode-test/
 *.vsix
 test-log/
+
+# AI開発支援用ドキュメント (プロジェクト固有)
+CLAUDE.md
+DESIGN.md
