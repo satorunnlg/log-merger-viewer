@@ -2,6 +2,26 @@
 
 このファイルでは「Log Merger Viewer」拡張機能のすべての重要な変更を記録しています。
 
+## [0.1.3] - 2026年6月23日
+
+### セキュリティ
+- Dependabot アラート対応（npm 推移的依存の脆弱性を `npm audit fix` で修正）
+  - fast-uri: パストラバーサル / ホスト混同 脆弱性修正 (HIGH、3.1.2 へ更新)
+  - flatted: parse() による Prototype Pollution 脆弱性修正 (HIGH、3.4.2 へ更新)
+  - picomatch: メソッドインジェクション / ReDoS 脆弱性修正 (MEDIUM、2.3.2 へ更新)
+  - serialize-javascript: CPU 枯渇による DoS 脆弱性修正 (MEDIUM、7.0.6 へ更新)
+  - あわせて brace-expansion / js-yaml の脆弱性も解消
+- `npm audit` の検出脆弱性は 0 件
+
+## [0.1.2] - 2026年3月14日
+
+### セキュリティ
+- セキュリティ脆弱性の一括修正
+  - serialize-javascript: RCE 脆弱性修正 (GHSA-5c6j-r48x-rmvq、overrides で ^7.0.3 に強制)
+  - minimatch: 正規表現DoS (ReDoS) 脆弱性修正 (3件)
+  - webpack: SSRF 脆弱性修正 (2件)
+  - ajv ReDoS / diff DoS / flatted DoS 修正
+
 ## [0.1.1] - 2026年1月3日
 
 ### セキュリティ
