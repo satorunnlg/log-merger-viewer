@@ -2,6 +2,18 @@
 
 このファイルでは「Log Merger Viewer」拡張機能のすべての重要な変更を記録しています。
 
+## [0.1.4] - 2026年9月21日
+
+### セキュリティ
+- Dependabot アラート対応（npm 推移的依存の脆弱性 14 件を `npm audit fix` で修正）
+  - fast-uri: SSRF / ホスト混同 脆弱性修正 (HIGH、3.1.8 へ更新、GHSA-4c8g-83qw-93j6 ほか 5 件)
+  - js-yaml: マージキー / !!omap 処理の二次的 CPU 消費 DoS 修正 (HIGH、4.3.2 へ更新、GHSA-2883-xcg3-v3hh ほか 2 件)
+  - brace-expansion: 指数時間展開による DoS 修正 (HIGH、1.1.21 / 2.1.7 へ更新、GHSA-3jxr-9vmj-r5cp)
+  - browserslist: 信頼できない browserslist-stats によるクラッシュ / prototype 書き込み修正 (HIGH、4.29.0 へ更新、GHSA-73wf-gq98-2v4g)
+  - baseline-browser-mapping: 不正入力によるプロセス終了 DoS 修正 (MEDIUM、2.11.25 へ更新、GHSA-w5vr-8v7q-w6rv)
+  - @humanfs/node: 再帰コピーが symlink を辿る問題を修正 (MEDIUM、0.16.8 へ更新、GHSA-p498-v437-472g)
+- `npm audit` の検出脆弱性は 0 件。拡張機能本体のコード変更はなし
+
 ## [0.1.3] - 2026年6月23日
 
 ### セキュリティ
