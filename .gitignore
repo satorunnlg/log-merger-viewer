@@ -7,4 +7,5 @@ test-log/
 
 # AI開発支援用ドキュメント (プロジェクト固有)
 CLAUDE.md
+AGENTS.md
 DESIGN.md
